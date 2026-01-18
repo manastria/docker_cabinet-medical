@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # -----------------------------------------------------------------
+  # Service Base de Données (MariaDB)
+  # -----------------------------------------------------------------
+  db:
+    image: mariadb:10.11 # Version stable (LTS)
+    container_name: cabinet_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      # Persistance des données (pour ne pas perdre la bdd au redémarrage)
+      - ./database/data:/var/lib/mysql
+      # Chargement automatique du script SQL au premier lancement
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - internal-net
+
+  # -----------------------------------------------------------------
+  # Service Interface d'administration (phpMyAdmin)
+  # -----------------------------------------------------------------
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: cabinet_pma
+    restart: always
+    environment:
+      PMA_HOST: db    # Doit correspondre au nom du service ci-dessus
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${PORT_PMA}:80" # Accès via http://localhost:8080
+    depends_on:
+      - db
+    networks:
+      - internal-net
+
+  # -----------------------------------------------------------------
+  # Service Serveur Web (Apache + PHP)
+  # -----------------------------------------------------------------
+  web:
+    build: ./web      # Utilise le Dockerfile situé dans le dossier web/
+    container_name: cabinet_web
+    restart: always
+    ports:
+      - "${PORT_WEB}:80" # Accès via http://localhost
+    volumes:
+      - ./www:/var/www/html # Synchronise votre dossier code avec le conteneur
+    depends_on:
+      - db
+    networks:
+      - internal-net
+
+# Réseau interne pour que les conteneurs discutent entre eux
+networks:
+  internal-net:
+    driver: bridge
