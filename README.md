@@ -26,3 +26,7 @@ Patient (id_patient, nom, prenom, date_naissance, num_ss, #id_adresse, #id_infir
 
 - Réutilisabilité : L'entité `Adresse` est devenue une "table de référence". On peut y lier n'importe quel acteur du système (patient, infirmière, fournisseur, etc.) sans dupliquer les colonnes `ville` ou `code_postal`.
 - Intégrité V1 : La contrainte métier "Un patient est toujours visité par la même infirmière"  est implémentée physiquement par la clé étrangère `id_infirmiere` directement dans la table `Patient`. Il est ainsi impossible techniquement d'affecter deux infirmières à un seul patient dans cette structure.
+
+## Reset factory
+
+La réinitialisation de la base de données se fait avec le script `reset.sh`.
