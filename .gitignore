@@ -1,0 +1,9 @@
+# Données de la base de données
+database/data/*
+!database/data/.gitkeep
+
+# Variables d'environnement (Secrets)
+#.env
+
+# Divers
+.DS_Store
